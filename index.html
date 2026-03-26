@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Casino House Edge Calculator — Free Tool by BTCGambling.com</title>
+    <meta name="description" content="Calculate the true house edge, RTP, and expected loss for crypto casino games. Supports dice, crash, roulette, blackjack, plinko, and slots. Free open-source tool.">
+    <meta name="keywords" content="house edge calculator, crypto casino house edge, bitcoin dice house edge, crash game house edge, RTP calculator, expected loss calculator">
+    <meta name="author" content="BTCGambling.com">
+    <meta property="og:title" content="Crypto Casino House Edge Calculator">
+    <meta property="og:description" content="Calculate the true house edge and expected loss for crypto casino games. Free, open-source, runs in your browser.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gamblingbitcoin.github.io/crypto-casino-house-edge-calculator/">
+    <link rel="canonical" href="https://gamblingbitcoin.github.io/crypto-casino-house-edge-calculator/">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-card-hover: #1f2a40;
+            --bg-input: #0f1729;
+            --border: #2a3654;
+            --border-active: #3b82f6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --green: #22c55e;
+            --green-bg: rgba(34, 197, 94, 0.1);
+            --red: #ef4444;
+            --red-bg: rgba(239, 68, 68, 0.1);
+            --yellow: #eab308;
+            --yellow-bg: rgba(234, 179, 8, 0.1);
+            --orange: #f97316;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 48px 0 40px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        h1 {
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+
+        /* Game Tabs */
+        .game-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            padding: 4px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .game-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .game-tab:hover {
+            color: var(--text-secondary);
+            background: var(--bg-card);
+        }
+
+        .game-tab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .game-tab .tab-icon {
+            font-size: 20px;
+        }
+
+        /* Main Layout */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 700px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+        }
+
+        .card-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            margin-bottom: 24px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        label .label-hint {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--border-active);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input[type="number"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Remove spinner arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+
+        /* Range slider */
+        .range-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .range-row input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .range-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .range-value {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+            min-width: 60px;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* Results */
+        .results-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .result-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item:first-child {
+            padding-top: 0;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'IBM Plex Mono', monospace;
+            letter-spacing: -0.5px;
+        }
+
+        .result-value.good { color: var(--green); }
+        .result-value.warning { color: var(--yellow); }
+        .result-value.bad { color: var(--red); }
+        .result-value.neutral { color: var(--text-primary); }
+
+        .result-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Rating bar */
+        .edge-rating {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .rating-bar-track {
+            height: 8px;
+            background: linear-gradient(90deg, var(--green), var(--yellow), var(--orange), var(--red));
+            border-radius: 4px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .rating-bar-marker {
+            position: absolute;
+            top: -4px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 6px rgba(0,0,0,0.4);
+            transition: left 0.4s ease;
+        }
+
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        .rating-verdict {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            font-size: 20px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table .edge-cell {
+            font-weight: 600;
+        }
+
+        .comparison-table .edge-low { color: var(--green); }
+        .comparison-table .edge-mid { color: var(--yellow); }
+        .comparison-table .edge-high { color: var(--red); }
+
+        /* Info Section */
+        .info-section {
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+        }
+
+        .info-card h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .info-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-card code {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+        .formula-block {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+            overflow-x: auto;
+        }
+
+        .formula-block .comment {
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--accent);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 12px;
+        }
+
+        /* Bet Simulator */
+        .sim-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 700px) {
+            .sim-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sim-stat {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .sim-stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            margin-bottom: 4px;
+        }
+
+        .sim-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Helpers */
+        .hidden { display: none !important; }
+
+        .game-desc {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 20px;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 500px) {
+            .game-tab {
+                min-width: 70px;
+                padding: 10px 8px;
+                font-size: 11px;
+            }
+            .game-tab .tab-icon { font-size: 16px; }
+            .card { padding: 20px; }
+            .result-value { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-badge"><span class="dot"></span> Open-Source Tool</div>
+        <h1>House Edge Calculator</h1>
+        <p class="subtitle">Calculate the true house edge, RTP, and expected loss for popular crypto casino games</p>
+    </header>
+
+    <!-- Game Tabs -->
+    <div class="game-tabs" role="tablist">
+        <button class="game-tab active" data-game="dice" role="tab">
+            <span class="tab-icon">🎲</span> Dice
+        </button>
+        <button class="game-tab" data-game="crash" role="tab">
+            <span class="tab-icon">🚀</span> Crash
+        </button>
+        <button class="game-tab" data-game="roulette" role="tab">
+            <span class="tab-icon">🎡</span> Roulette
+        </button>
+        <button class="game-tab" data-game="blackjack" role="tab">
+            <span class="tab-icon">🃏</span> Blackjack
+        </button>
+        <button class="game-tab" data-game="plinko" role="tab">
+            <span class="tab-icon">📍</span> Plinko
+        </button>
+        <button class="game-tab" data-game="slots" role="tab">
+            <span class="tab-icon">🎰</span> Slots
+        </button>
+    </div>
+
+    <!-- Calculator Grid -->
+    <div class="calc-grid">
+
+        <!-- Input Card -->
+        <div class="card" id="input-card">
+            <div class="card-title">⚙ Parameters</div>
+
+            <!-- Dice -->
+            <div id="game-dice" class="game-panel">
+                <div class="game-desc">Classic dice: you pick a target number and bet over/under. The payout depends on your win probability.</div>
+                <div class="form-group">
+                    <label>Win Chance <span class="label-hint">(%)</span></label>
+                    <div class="range-row">
+                        <input type="range" id="dice-chance" min="1" max="98" value="50" step="0.1">
+                        <span class="range-value" id="dice-chance-val">50.0%</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Payout Multiplier <span class="label-hint">(offered by casino)</span></label>
+                    <input type="number" id="dice-payout" value="1.98" step="0.01" min="1.01" placeholder="e.g. 1.98">
+                </div>
+                <div class="form-group">
+                    <label>Bet Amount <span class="label-hint">(any currency)</span></label>
+                    <input type="number" id="dice-bet" value="1" step="0.01" min="0.01" placeholder="e.g. 1.00">
+                </div>
+            </div>
+
+            <!-- Crash -->
+            <div id="game-crash" class="game-panel hidden">
+                <div class="game-desc">Crash / Limbo: a multiplier rises from 1× and can crash at any moment. You cash out before it crashes.</div>
+                <div class="form-group">
+                    <label>Casino Commission <span class="label-hint">(% per round, usually 1-4%)</span></label>
+                    <input type="number" id="crash-commission" value="1" step="0.1" min="0" max="20" placeholder="e.g. 1">
+                </div>
+                <div class="form-group">
+                    <label>Your Cash-Out Target <span class="label-hint">(×)</span></label>
+                    <input type="number" id="crash-target" value="2" step="0.1" min="1.01" placeholder="e.g. 2.0">
+                </div>
+                <div class="form-group">
+                    <label>Bet Amount</label>
+                    <input type="number" id="crash-bet" value="1" step="0.01" min="0.01" placeholder="e.g. 1.00">
+                </div>
+            </div>
+
+            <!-- Roulette -->
+            <div id="game-roulette" class="game-panel hidden">
+                <div class="game-desc">The house edge depends on how many slots the wheel has. European (1 zero) vs American (2 zeros) makes a big difference.</div>
+                <div class="form-group">
+                    <label>Roulette Type</label>
+                    <select id="roulette-type">
+                        <option value="european">European — 37 slots (1 zero)</option>
+                        <option value="american">American — 38 slots (2 zeros)</option>
+                        <option value="triple">Triple Zero — 39 slots (3 zeros)</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="roulette-custom-group">
+                    <label>Total Slots on Wheel</label>
+                    <input type="number" id="roulette-slots" value="37" min="2" step="1" placeholder="e.g. 37">
+                </div>
+                <div class="form-group hidden" id="roulette-zeros-group">
+                    <label>Number of Zero Slots</label>
+                    <input type="number" id="roulette-zeros" value="1" min="1" step="1" placeholder="e.g. 1">
+                </div>
+                <div class="form-group">
+                    <label>Bet Amount</label>
+                    <input type="number" id="roulette-bet" value="1" step="0.01" min="0.01" placeholder="e.g. 1.00">
+                </div>
+            </div>
+
+            <!-- Blackjack -->
+            <div id="game-blackjack" class="game-panel hidden">
+                <div class="game-desc">Blackjack house edge varies by ruleset. Pick the rules your casino uses, or enter a known edge directly.</div>
+                <div class="form-group">
+                    <label>Number of Decks</label>
+                    <select id="bj-decks">
+                        <option value="1">1 Deck</option>
+                        <option value="2">2 Decks</option>
+                        <option value="4">4 Decks</option>
+                        <option value="6">6 Decks</option>
+                        <option value="8" selected>8 Decks (most common online)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dealer Hits Soft 17?</label>
+                    <select id="bj-h17">
+                        <option value="yes">Yes — H17 (worse for player)</option>
+                        <option value="no" selected>No — S17 (stands on soft 17)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Blackjack Pays</label>
+                    <select id="bj-pays">
+                        <option value="3:2" selected>3:2 (standard)</option>
+                        <option value="6:5">6:5 (worse for player)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bet Amount</label>
+                    <input type="number" id="bj-bet" value="1" step="0.01" min="0.01" placeholder="e.g. 1.00">
+                </div>
+            </div>
+
+            <!-- Plinko -->
+            <div id="game-plinko" class="game-panel hidden">
+                <div class="game-desc">Plinko: a ball drops through pegs into multiplier buckets. The house edge is baked into the multiplier values.</div>
+                <div class="form-group">
+                    <label>Number of Rows</label>
+                    <select id="plinko-rows">
+                        <option value="8">8 rows</option>
+                        <option value="12">12 rows</option>
+                        <option value="16" selected>16 rows</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Risk Level</label>
+                    <select id="plinko-risk">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stated RTP <span class="label-hint">(% — check casino info)</span></label>
+                    <input type="number" id="plinko-rtp" value="99" step="0.01" min="80" max="100" placeholder="e.g. 99">
+                </div>
+                <div class="form-group">
+                    <label>Bet Amount</label>
+                    <input type="number" id="plinko-bet" value="1" step="0.01" min="0.01" placeholder="e.g. 1.00">
+                </div>
+            </div>
+
+            <!-- Slots -->
+            <div id="game-slots" class="game-panel hidden">
+                <div class="game-desc">Crypto slots: the RTP is usually published by the game provider. Enter it here to see the true cost of playing.</div>
+                <div class="form-group">
+                    <label>Stated RTP <span class="label-hint">(% — found in game info)</span></label>
+                    <input type="number" id="slots-rtp" value="96" step="0.01" min="50" max="100" placeholder="e.g. 96">
+                </div>
+                <div class="form-group">
+                    <label>Bet Amount</label>
+                    <input type="number" id="slots-bet" value="1" step="0.01" min="0.01" placeholder="e.g. 1.00">
+                </div>
+                <div class="form-group">
+                    <label>Spins Per Session</label>
+                    <input type="number" id="slots-spins" value="100" step="1" min="1" placeholder="e.g. 100">
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Card -->
+        <div class="card results-card" id="results-card">
+            <div>
+                <div class="card-title">📊 Results</div>
+
+                <div class="result-item">
+                    <div class="result-label">House Edge</div>
+                    <div class="result-value" id="res-edge">1.00%</div>
+                    <div class="result-note" id="res-edge-note">Per bet placed</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">Return to Player (RTP)</div>
+                    <div class="result-value neutral" id="res-rtp">99.00%</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">Expected Loss per 100 Bets</div>
+                    <div class="result-value" id="res-loss">1.00</div>
+                    <div class="result-note" id="res-loss-note">Based on your bet size</div>
+                </div>
+
+                <div class="result-item" id="res-win-prob-row">
+                    <div class="result-label">Win Probability</div>
+                    <div class="result-value neutral" id="res-winprob">50.00%</div>
+                </div>
+            </div>
+
+            <div class="edge-rating">
+                <div class="rating-bar-track">
+                    <div class="rating-bar-marker" id="rating-marker" style="left: 10%"></div>
+                </div>
+                <div class="rating-labels">
+                    <span>Excellent</span>
+                    <span>Average</span>
+                    <span>Poor</span>
+                </div>
+                <div class="rating-verdict" id="rating-verdict" style="color: var(--green);">Low edge — fair game</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expected Loss Simulator -->
+    <div class="comparison-section">
+        <div class="section-title"><span class="icon">📉</span> Expected Loss Over Time</div>
+        <div class="sim-row">
+            <div class="sim-stat">
+                <div class="sim-stat-label">After 100 Bets</div>
+                <div class="sim-stat-value bad" id="sim-100">—</div>
+            </div>
+            <div class="sim-stat">
+                <div class="sim-stat-label">After 500 Bets</div>
+                <div class="sim-stat-value bad" id="sim-500">—</div>
+            </div>
+            <div class="sim-stat">
+                <div class="sim-stat-label">After 1,000 Bets</div>
+                <div class="sim-stat-value bad" id="sim-1000">—</div>
+            </div>
+            <div class="sim-stat">
+                <div class="sim-stat-label">After 10,000 Bets</div>
+                <div class="sim-stat-value bad" id="sim-10000">—</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typical House Edge Comparison -->
+    <div class="comparison-section">
+        <div class="section-title"><span class="icon">⚖</span> Typical House Edges by Game</div>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th>Typical Edge</th>
+                    <th>RTP</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🎲 Dice (1% edge)</td>
+                    <td class="edge-cell edge-low">1.00%</td>
+                    <td>99.00%</td>
+                    <td style="color:var(--green)">Excellent</td>
+                </tr>
+                <tr>
+                    <td>🚀 Crash (1% fee)</td>
+                    <td class="edge-cell edge-low">1.00%</td>
+                    <td>99.00%</td>
+                    <td style="color:var(--green)">Excellent</td>
+                </tr>
+                <tr>
+                    <td>🃏 Blackjack (8D S17)</td>
+                    <td class="edge-cell edge-low">0.46%</td>
+                    <td>99.54%</td>
+                    <td style="color:var(--green)">Excellent</td>
+                </tr>
+                <tr>
+                    <td>🎡 European Roulette</td>
+                    <td class="edge-cell edge-mid">2.70%</td>
+                    <td>97.30%</td>
+                    <td style="color:var(--yellow)">Average</td>
+                </tr>
+                <tr>
+                    <td>🎡 American Roulette</td>
+                    <td class="edge-cell edge-high">5.26%</td>
+                    <td>94.74%</td>
+                    <td style="color:var(--red)">Poor</td>
+                </tr>
+                <tr>
+                    <td>📍 Plinko (typical)</td>
+                    <td class="edge-cell edge-low">1.00%</td>
+                    <td>99.00%</td>
+                    <td style="color:var(--green)">Excellent</td>
+                </tr>
+                <tr>
+                    <td>🎰 Slots (typical)</td>
+                    <td class="edge-cell edge-mid">4.00%</td>
+                    <td>96.00%</td>
+                    <td style="color:var(--yellow)">Average</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+        <div class="info-card">
+            <h3>📐 How House Edge Is Calculated</h3>
+            <p>The house edge represents the mathematical advantage the casino has on every bet you place. It's expressed as a percentage of each wager that the casino expects to keep over time.</p>
+
+            <p><strong>For dice games:</strong></p>
+            <div class="formula-block">
+                <span class="comment">// Fair payout = 1 / (win chance / 100)</span><br>
+                <span class="comment">// House edge = (1 - (actual payout / fair payout)) × 100</span><br><br>
+                Win chance: 50% → Fair payout: 2.00×<br>
+                Casino offers: 1.98× → House edge: 1.00%
+            </div>
+
+            <p><strong>For crash / limbo:</strong></p>
+            <div class="formula-block">
+                <span class="comment">// The commission is taken from the prize pool each round</span><br>
+                <span class="comment">// House edge ≈ commission percentage</span><br><br>
+                Commission: 1% → House edge: 1.00%
+            </div>
+
+            <p><strong>For roulette:</strong></p>
+            <div class="formula-block">
+                <span class="comment">// House edge = number of zeros / total slots × 100</span><br><br>
+                European: 1/37 = 2.70%<br>
+                American: 2/38 = 5.26%
+            </div>
+
+            <p><strong>Return to Player (RTP)</strong> is simply <code>100% - house edge</code>. An RTP of 99% means that for every $100 wagered, you can expect to get $99 back on average over a large number of bets.</p>
+
+            <p>Keep in mind that house edge describes the long-term mathematical expectation. Short-term results can vary wildly due to variance, which is why gambling should always be approached responsibly.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://btcgambling.com/house-edge-calculator/" target="_blank">Blog Post</a>
+            <a href="https://github.com/gamblingbitcoin/crypto-casino-house-edge-calculator" target="_blank">View on GitHub</a>
+            <a href="https://btcgambling.com" target="_blank">BTCGambling.com</a>
+        </div>
+        <p>Built and maintained by <a href="https://btcgambling.com" target="_blank">BTCGambling.com</a> — Independent crypto gambling resource</p>
+    </footer>
+</div>
+
+<script>
+(function() {
+    // --- State ---
+    let currentGame = 'dice';
+
+    // --- DOM refs ---
+    const tabs = document.querySelectorAll('.game-tab');
+    const panels = document.querySelectorAll('.game-panel');
+
+    // Results
+    const resEdge = document.getElementById('res-edge');
+    const resEdgeNote = document.getElementById('res-edge-note');
+    const resRTP = document.getElementById('res-rtp');
+    const resLoss = document.getElementById('res-loss');
+    const resLossNote = document.getElementById('res-loss-note');
+    const resWinProb = document.getElementById('res-winprob');
+    const resWinProbRow = document.getElementById('res-win-prob-row');
+    const ratingMarker = document.getElementById('rating-marker');
+    const ratingVerdict = document.getElementById('rating-verdict');
+
+    // Sim
+    const sim100 = document.getElementById('sim-100');
+    const sim500 = document.getElementById('sim-500');
+    const sim1000 = document.getElementById('sim-1000');
+    const sim10000 = document.getElementById('sim-10000');
+
+    // --- Tab switching ---
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const game = tab.dataset.game;
+            currentGame = game;
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            panels.forEach(p => p.classList.add('hidden'));
+            document.getElementById('game-' + game).classList.remove('hidden');
+            document.getElementById('game-' + game).classList.add('fade-in');
+            calculate();
+        });
+    });
+
+    // --- Roulette type toggle ---
+    const rouletteType = document.getElementById('roulette-type');
+    const rouletteCustom = document.getElementById('roulette-custom-group');
+    const rouletteZeros = document.getElementById('roulette-zeros-group');
+    rouletteType.addEventListener('change', () => {
+        if (rouletteType.value === 'custom') {
+            rouletteCustom.classList.remove('hidden');
+            rouletteZeros.classList.remove('hidden');
+        } else {
+            rouletteCustom.classList.add('hidden');
+            rouletteZeros.classList.add('hidden');
+        }
+        calculate();
+    });
+
+    // --- Dice range slider sync ---
+    const diceChance = document.getElementById('dice-chance');
+    const diceChanceVal = document.getElementById('dice-chance-val');
+    const dicePayout = document.getElementById('dice-payout');
+
+    diceChance.addEventListener('input', () => {
+        diceChanceVal.textContent = parseFloat(diceChance.value).toFixed(1) + '%';
+        // Auto-calculate a "typical" payout with 1% edge
+        const fairPayout = 1 / (parseFloat(diceChance.value) / 100);
+        dicePayout.value = (fairPayout * 0.99).toFixed(4);
+        calculate();
+    });
+
+    // --- Bind all inputs ---
+    document.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', calculate);
+        el.addEventListener('change', calculate);
+    });
+
+    // --- Calculation engine ---
+    function calculate() {
+        let edge, rtp, betAmount, winProb, showWinProb = true;
+
+        switch (currentGame) {
+            case 'dice': {
+                const chance = parseFloat(diceChance.value) || 50;
+                const payout = parseFloat(dicePayout.value) || 1.98;
+                betAmount = parseFloat(document.getElementById('dice-bet').value) || 1;
+                const fairPayout = 1 / (chance / 100);
+                edge = (1 - payout / fairPayout) * 100;
+                rtp = 100 - edge;
+                winProb = chance;
+                break;
+            }
+            case 'crash': {
+                const commission = parseFloat(document.getElementById('crash-commission').value) || 1;
+                const target = parseFloat(document.getElementById('crash-target').value) || 2;
+                betAmount = parseFloat(document.getElementById('crash-bet').value) || 1;
+                edge = commission;
+                rtp = 100 - edge;
+                // Win prob for crash: prob of reaching target with commission
+                // In a fair game with c% commission: prob = (1-c/100) / target
+                winProb = ((1 - commission / 100) / target) * 100;
+                break;
+            }
+            case 'roulette': {
+                betAmount = parseFloat(document.getElementById('roulette-bet').value) || 1;
+                let totalSlots, zeros;
+                const type = rouletteType.value;
+                if (type === 'european') { totalSlots = 37; zeros = 1; }
+                else if (type === 'american') { totalSlots = 38; zeros = 2; }
+                else if (type === 'triple') { totalSlots = 39; zeros = 3; }
+                else {
+                    totalSlots = parseInt(document.getElementById('roulette-slots').value) || 37;
+                    zeros = parseInt(document.getElementById('roulette-zeros').value) || 1;
+                }
+                edge = (zeros / totalSlots) * 100;
+                rtp = 100 - edge;
+                // Win prob for a simple red/black bet
+                winProb = ((totalSlots - zeros) / 2 / totalSlots) * 100;
+                break;
+            }
+            case 'blackjack': {
+                betAmount = parseFloat(document.getElementById('bj-bet').value) || 1;
+                const decks = parseInt(document.getElementById('bj-decks').value);
+                const h17 = document.getElementById('bj-h17').value === 'yes';
+                const pays65 = document.getElementById('bj-pays').value === '6:5';
+
+                // Base edge approximation for 8-deck S17 3:2 = ~0.46%
+                let baseEdge = 0.46;
+                // Deck adjustments (approximate)
+                if (decks === 1) baseEdge -= 0.48;
+                else if (decks === 2) baseEdge -= 0.19;
+                else if (decks === 4) baseEdge -= 0.06;
+                else if (decks === 6) baseEdge -= 0.02;
+                // H17 adds ~0.22%
+                if (h17) baseEdge += 0.22;
+                // 6:5 adds ~1.39%
+                if (pays65) baseEdge += 1.39;
+
+                edge = Math.max(baseEdge, 0.01);
+                rtp = 100 - edge;
+                showWinProb = false;
+                break;
+            }
+            case 'plinko': {
+                betAmount = parseFloat(document.getElementById('plinko-bet').value) || 1;
+                const statedRTP = parseFloat(document.getElementById('plinko-rtp').value) || 99;
+                rtp = statedRTP;
+                edge = 100 - rtp;
+                showWinProb = false;
+                break;
+            }
+            case 'slots': {
+                const slotsRTP = parseFloat(document.getElementById('slots-rtp').value) || 96;
+                betAmount = parseFloat(document.getElementById('slots-bet').value) || 1;
+                rtp = slotsRTP;
+                edge = 100 - rtp;
+                showWinProb = false;
+                break;
+            }
+        }
+
+        // Clamp
+        edge = Math.max(edge, 0);
+        rtp = Math.min(rtp, 100);
+
+        // Update results
+        updateResults(edge, rtp, betAmount, winProb, showWinProb);
+    }
+
+    function updateResults(edge, rtp, betAmount, winProb, showWinProb) {
+        // Edge
+        resEdge.textContent = edge.toFixed(2) + '%';
+        resEdge.className = 'result-value ' + getEdgeClass(edge);
+
+        // RTP
+        resRTP.textContent = rtp.toFixed(2) + '%';
+
+        // Expected loss per 100 bets
+        const lossPer100 = betAmount * 100 * (edge / 100);
+        resLoss.textContent = '-' + lossPer100.toFixed(2);
+        resLoss.className = 'result-value bad';
+        resLossNote.textContent = 'Based on ' + betAmount.toFixed(2) + ' per bet × 100 bets';
+
+        // Win prob
+        if (showWinProb) {
+            resWinProbRow.classList.remove('hidden');
+            resWinProb.textContent = winProb.toFixed(2) + '%';
+        } else {
+            resWinProbRow.classList.add('hidden');
+        }
+
+        // Rating bar
+        // Scale: 0% = left (excellent), 10% = right (poor)
+        const pos = Math.min(edge / 10 * 100, 100);
+        ratingMarker.style.left = pos + '%';
+
+        let verdict, verdictColor;
+        if (edge <= 1) { verdict = 'Low edge — fair game'; verdictColor = 'var(--green)'; }
+        else if (edge <= 2.5) { verdict = 'Below average — acceptable'; verdictColor = 'var(--green)'; }
+        else if (edge <= 4) { verdict = 'Above average edge'; verdictColor = 'var(--yellow)'; }
+        else if (edge <= 6) { verdict = 'High edge — proceed with caution'; verdictColor = 'var(--orange)'; }
+        else { verdict = 'Very high edge — unfavorable'; verdictColor = 'var(--red)'; }
+        ratingVerdict.textContent = verdict;
+        ratingVerdict.style.color = verdictColor;
+
+        // Sim
+        const update = (el, bets) => {
+            const loss = betAmount * bets * (edge / 100);
+            el.textContent = '-' + loss.toFixed(2);
+        };
+        update(sim100, 100);
+        update(sim500, 500);
+        update(sim1000, 1000);
+        update(sim10000, 10000);
+    }
+
+    function getEdgeClass(edge) {
+        if (edge <= 1.5) return 'good';
+        if (edge <= 4) return 'warning';
+        return 'bad';
+    }
+
+    // Initial calc
+    calculate();
+})();
+</script>
+
+</body>
+</html>
