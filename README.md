@@ -40,6 +40,18 @@ Visit the [live tool](https://gamblingbitcoin.github.io/crypto-casino-house-edge
 4. Enter the casino's parameters
 5. Read the house edge, RTP, and expected loss
 
+### Embed on Your Website
+
+You can embed this calculator on any website for free — paste this into your HTML or a WordPress "Custom HTML" block:
+
+```html
+<!-- Crypto Casino House Edge Calculator — free widget by BTCGambling.com -->
+<iframe src="https://gamblingbitcoin.github.io/crypto-casino-house-edge-calculator/" style="width:100%;max-width:560px;height:900px;border:1px solid #ddd;border-radius:8px" loading="lazy" title="Crypto Casino House Edge Calculator"></iframe>
+<p style="font-size:13px;margin-top:6px">Free <a href="https://btcgambling.com/house-edge-calculator/">House Edge Calculator</a> by BTCGambling.com</p>
+```
+
+Free for any site, commercial or not — just keep the credit link intact. Full instructions: [btcgambling.com/house-edge-calculator/](https://btcgambling.com/house-edge-calculator/)
+
 ## Calculations Explained
 
 ### Dice
